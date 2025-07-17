@@ -5,5 +5,5 @@ pydantic
 pandas
 pycaret
 python-dotenv
-langfuse
+langfuse==2.51.4
 boto3
