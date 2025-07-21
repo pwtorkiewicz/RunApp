@@ -14,6 +14,7 @@ from langfuse.openai import OpenAI as LangfuseOpenAI
 import boto3
 import io
 import pickle
+import sys # Importujemy sys do wypisywania na stderr, co często jest logowane
 
 
 
