@@ -7,3 +7,5 @@ pycaret
 python-dotenv
 langfuse==2.51.4
 boto3
+joblib
+requests

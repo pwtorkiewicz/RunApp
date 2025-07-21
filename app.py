@@ -14,12 +14,15 @@ from langfuse.openai import OpenAI as LangfuseOpenAI
 import boto3
 import io
 import pickle
+import joblib
+import requests
 
 
 # --- Inicjalizacja zmiennych środowiskowych, ścieżki modelu ML, bucketu w DigitalOcean ---
 
 env = dotenv_values(".env")
-Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML
+Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
+Model_pkl_in_github = "https://raw.githubusercontent.com/pwtorkiewicz/RunApp/main/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
 
 # --- ustawienie set_page_config Streamlit ---
@@ -62,8 +65,43 @@ langfuse = Langfuse(
 langfuse.auth_check()
 
 # --- Ładowanie Modelu ML---
+
+
 @st.cache_resource
-def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
+def load_model_from_github(github_raw_url):
+    """
+    Wczytuje model .pkl z surowego URL na GitHubie.
+
+    Argumenty:
+        github_raw_url (str): URL do surowego pliku .pkl na GitHubie.
+
+    Zwraca:
+        object: Załadowany model.
+    """
+    try:
+        response = requests.get(github_raw_url, stream=True)
+        response.raise_for_status() # Sprawdza, czy zapytanie zakończyło się sukcesem
+
+        # Zapisz zawartość do tymczasowego pliku i wczytaj go
+        with open("temp_model.pkl", "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        model = joblib.load("temp_model.pkl")
+        return model
+    except requests.exceptions.RequestException as e:
+        st.error(f"Błąd pobierania pliku z GitHuba: {e}")
+        return None
+    except Exception as e:
+        st.error(f"Błąd podczas ładowania modelu: {e}")
+        return None
+
+
+
+
+
+
+'''def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
     """
     Ładuje model PyCaret (.pkl) z DigitalOcean Spaces, 
     używając kluczy i endpointu ze zmiennych środowiskowych.
@@ -112,7 +150,7 @@ def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
 
     except Exception as e:
         print(f"Wystąpił błąd podczas ładowania modelu: {e}")
-        return None
+        return None'''
 
 
 # --- Modele Pydantic do strukturyzacji danych ---
@@ -211,10 +249,8 @@ Podaj płeć, wiek, a także czas na 5km. **Czasy zostaną skonwertowane na seku
 """)
 
 # Załaduj model
-pycaret_model = load_pycaret_model_from_do_spaces(
-    bucket_name=BUCKET_NAME,
-    object_key=Model_pkl_in_spaces
-)
+#pycaret_model = load_pycaret_model_from_do_spaces(
+pycaret_model = load_model_from_github(github_raw_url=Model_pkl_in_github)
 
 # Użyj wartości z session_state jako domyślnej wartości pola tekstowego
 # Streamlit automatycznie aktualizuje session_state['user_input_text_area']
