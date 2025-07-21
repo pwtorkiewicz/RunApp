@@ -66,19 +66,9 @@ langfuse.auth_check()
 # --- Ładowanie Modelu ML---
 
 
-@st.cache_resource
-def load_model_from_github(github_raw_url):
-    """
-    Wczytuje model .pkl z surowego URL na GitHubie.
 
-    Argumenty:
-        github_raw_url (str): URL do surowego pliku .pkl na GitHubie.
+model = load_model(Model_pkl_in_github)
 
-    Zwraca:
-        object: Załadowany model.
-    """
-    model = load_model("github_raw_url")
-    return model
 
 
 
@@ -234,7 +224,7 @@ Podaj płeć, wiek, a także czas na 5km. **Czasy zostaną skonwertowane na seku
 
 # Załaduj model
 #pycaret_model = load_pycaret_model_from_do_spaces(
-pycaret_model = load_model_from_github(github_raw_url=Model_pkl_in_github)
+pycaret_model = model #load_model_from_github(github_raw_url=Model_pkl_in_github)
 
 # Użyj wartości z session_state jako domyślnej wartości pola tekstowego
 # Streamlit automatycznie aktualizuje session_state['user_input_text_area']
