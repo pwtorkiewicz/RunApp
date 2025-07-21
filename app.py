@@ -14,15 +14,14 @@ from langfuse.openai import OpenAI as LangfuseOpenAI
 import boto3
 import io
 import pickle
-import joblib
-import requests
+
 
 
 # --- Inicjalizacja zmiennych środowiskowych, ścieżki modelu ML, bucketu w DigitalOcean ---
 
 env = dotenv_values(".env")
 Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
-Model_pkl_in_github = "Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Github
+Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
 
 # --- ustawienie set_page_config Streamlit ---
