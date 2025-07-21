@@ -74,25 +74,38 @@ def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
     Args:
         bucket_name (str): Nazwa bucketa w DigitalOcean Spaces, gdzie przechowywany jest model.
         object_key (str): Klucz obiektu (ścieżka do pliku) modelu w bucketcie.
-                         Np. "RunModel/Model/runtime_regression_pipeline.pkl"
+                            Np. "RunModel/Model/runtime_regression_pipeline.pkl"
 
     Returns:
         object: Załadowany model PyCaret.
         None: Jeśli wystąpi błąd podczas ładowania.
     """
-   
+    st.info("Próba załadowania modelu z DigitalOcean Spaces...")
+    print("DEBUG: Rozpoczynam ładowanie modelu z DO Spaces.", file=sys.stderr)
 
     # Pobieranie danych uwierzytelniających i endpointu ze zmiennych środowiskowych
     endpoint_url = env.get("AWS_ENDPOINT_URL_S3")
     aws_access_key_id = env.get("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = env.get("AWS_SECRET_ACCESS_KEY")
 
+    print(f"DEBUG: Endpoint URL: {endpoint_url}", file=sys.stderr)
+    print(f"DEBUG: AWS Access Key ID (pierwsze 4 znaki): {aws_access_key_id[:4] if aws_access_key_id else 'Brak'}", file=sys.stderr)
+    # Nie logujemy całego secret_access_key ze względów bezpieczeństwa
+
     # Sprawdzenie, czy wszystkie zmienne są dostępne
     if not all([endpoint_url, aws_access_key_id, aws_secret_access_key]):
-        print("Błąd: Brakujące zmienne środowiskowe (DO_SPACES_ENDPOINT, DO_SPACES_ACCESS_KEY, DO_SPACES_SECRET_KEY) w pliku .env.")
+        missing_vars = []
+        if not endpoint_url: missing_vars.append("AWS_ENDPOINT_URL_S3")
+        if not aws_access_key_id: missing_vars.append("AWS_ACCESS_KEY_ID")
+        if not aws_secret_access_key: missing_vars.append("AWS_SECRET_ACCESS_KEY")
+        
+        error_msg = f"Błąd: Brakujące zmienne środowiskowe: {', '.join(missing_vars)}. Sprawdź plik .env lub konfigurację środowiska na DigitalOcean."
+        st.error(error_msg)
+        print(f"ERROR: {error_msg}", file=sys.stderr)
         return None
 
     try:
+        print("DEBUG: Inicjalizuję klienta S3...", file=sys.stderr)
         # Inicjalizacja klienta S3 dla DigitalOcean Spaces z danych ze zmiennych środowiskowych
         s3 = boto3.client(
             "s3",
@@ -100,21 +113,31 @@ def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
         )
+        print("DEBUG: Klient S3 zainicjalizowany pomyślnie.", file=sys.stderr)
 
+        print(f"DEBUG: Próbuję pobrać obiekt '{object_key}' z bucketa '{bucket_name}'...", file=sys.stderr)
         # Pobieranie obiektu z Spaces
         response = s3.get_object(Bucket=bucket_name, Key=object_key)
+        print(f"DEBUG: Obiekt '{object_key}' pobrany pomyślnie.", file=sys.stderr)
         
         # Odczytywanie zawartości pliku jako strumienia bajtów
+        print("DEBUG: Odczytuję zawartość pliku do strumienia bajtów...", file=sys.stderr)
         model_bytes = io.BytesIO(response['Body'].read())
+        print("DEBUG: Zawartość pliku odczytana. Rozmiar (pierwsze 100 bajtów):", len(model_bytes.getvalue()[:100]), file=sys.stderr) # Sprawdzenie, czy coś zostało odczytane
         
         # Deserializacja modelu PyCaret
+        print("DEBUG: Rozpoczynam deserializację modelu PyCaret...", file=sys.stderr)
         model = pickle.load(model_bytes)
+        print("DEBUG: Model PyCaret zdeserializowany pomyślnie.", file=sys.stderr)
         
-        print(f"Model '{object_key}' załadowany pomyślnie z bucketa '{bucket_name}'.")
+        st.success(f"Model '{object_key}' załadowany pomyślnie z bucketa '{bucket_name}'.")
+        print(f"INFO: Model '{object_key}' załadowany pomyślnie z bucketa '{bucket_name}'.", file=sys.stderr)
         return model
 
     except Exception as e:
-        print(f"Wystąpił błąd podczas ładowania modelu: {e}")
+        error_msg = f"Wystąpił błąd podczas ładowania modelu z DigitalOcean Spaces: {e}"
+        st.error(error_msg)
+        print(f"ERROR: {error_msg}", file=sys.stderr)
         return None
 
 
