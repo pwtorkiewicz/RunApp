@@ -20,7 +20,7 @@ import pickle
 # --- Inicjalizacja zmiennych środowiskowych, ścieżki modelu ML, bucketu w DigitalOcean ---
 
 env = dotenv_values(".env")
-Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline" # Zastosowany model ML na Digital Ocean Spaces
+Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
 #Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
 #test
