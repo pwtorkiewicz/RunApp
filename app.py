@@ -23,7 +23,7 @@ env = dotenv_values(".env")
 Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
 Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
-
+#test
 # --- ustawienie set_page_config Streamlit ---
 
 st.set_page_config(page_title="Przewidywanie Czasu Półmaratonu")
