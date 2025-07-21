@@ -20,8 +20,8 @@ import pickle
 # --- Inicjalizacja zmiennych środowiskowych, ścieżki modelu ML, bucketu w DigitalOcean ---
 
 env = dotenv_values(".env")
-Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
-Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
+Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline" # Zastosowany model ML na Digital Ocean Spaces
+#Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
 #test
 # --- ustawienie set_page_config Streamlit ---
@@ -65,17 +65,8 @@ langfuse.auth_check()
 
 # --- Ładowanie Modelu ML---
 
-
-
-model = load_model(Model_pkl_in_github)
-
-
-
-
-
-
-
-'''def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
+@st.cache_resource
+def load_pycaret_model_from_do_spaces(bucket_name: str, object_key: str):
     """
     Ładuje model PyCaret (.pkl) z DigitalOcean Spaces, 
     używając kluczy i endpointu ze zmiennych środowiskowych.
@@ -124,7 +115,7 @@ model = load_model(Model_pkl_in_github)
 
     except Exception as e:
         print(f"Wystąpił błąd podczas ładowania modelu: {e}")
-        return None'''
+        return None
 
 
 # --- Modele Pydantic do strukturyzacji danych ---
@@ -223,8 +214,10 @@ Podaj płeć, wiek, a także czas na 5km. **Czasy zostaną skonwertowane na seku
 """)
 
 # Załaduj model
-#pycaret_model = load_pycaret_model_from_do_spaces(
-pycaret_model = model #load_model_from_github(github_raw_url=Model_pkl_in_github)
+pycaret_model = load_pycaret_model_from_do_spaces(
+    bucket_name= BUCKET_NAME,
+    object_key= Model_pkl_in_spaces
+)
 
 # Użyj wartości z session_state jako domyślnej wartości pola tekstowego
 # Streamlit automatycznie aktualizuje session_state['user_input_text_area']
