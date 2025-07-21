@@ -22,7 +22,7 @@ import requests
 
 env = dotenv_values(".env")
 Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
-Model_pkl_in_github = "https://raw.githubusercontent.com/pwtorkiewicz/RunApp/main/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Github
+Model_pkl_in_github = "Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
 
 # --- ustawienie set_page_config Streamlit ---
@@ -78,23 +78,8 @@ def load_model_from_github(github_raw_url):
     Zwraca:
         object: Załadowany model.
     """
-    try:
-        response = requests.get(github_raw_url, stream=True)
-        response.raise_for_status() # Sprawdza, czy zapytanie zakończyło się sukcesem
-
-        # Zapisz zawartość do tymczasowego pliku i wczytaj go
-        with open("temp_model.pkl", "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        
-        model = joblib.load("temp_model.pkl")
-        return model
-    except requests.exceptions.RequestException as e:
-        st.error(f"Błąd pobierania pliku z GitHuba: {e}")
-        return None
-    except Exception as e:
-        st.error(f"Błąd podczas ładowania modelu: {e}")
-        return None
+    model = load_model("github_raw_url")
+    return model
 
 
 
