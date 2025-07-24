@@ -15,12 +15,14 @@ import boto3
 import io
 import pickle
 import sys # Importujemy sys do wypisywania na stderr, co często jest logowane
-
+import os
 
 
 # --- Inicjalizacja zmiennych środowiskowych, ścieżki modelu ML, bucketu w DigitalOcean ---
 
-env = dotenv_values(".env")
+#env = dotenv_values(".env")
+env_file = dotenv_values(".env")
+env = {**env_file, **os.environ}
 Model_pkl_in_spaces = "RunModel/Model/runtime_regression_pipeline.pkl" # Zastosowany model ML na Digital Ocean Spaces
 #Model_pkl_in_github = "Model/runtime_regression_pipeline" # Zastosowany model ML na Github
 BUCKET_NAME = "civil-eng"
